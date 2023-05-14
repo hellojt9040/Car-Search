@@ -4,7 +4,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 
-const SelectVariants = () => {
+const SelectVariants = ({ label, optionData }) => {
   const [age, setAge] = React.useState('');
 
   const handleChange = (event) => {
@@ -31,7 +31,7 @@ const SelectVariants = () => {
         </Select>
       </FormControl> */}
       <FormControl fullWidth variant="filled" sx={{ m: 1, minWidth: 120 }}>
-        <InputLabel id="demo-simple-select-filled-label">Age</InputLabel>
+        <InputLabel id="demo-simple-select-filled-label">{label}</InputLabel>
         <Select
           labelId="demo-simple-select-filled-label"
           id="demo-simple-select-filled"
@@ -41,13 +41,18 @@ const SelectVariants = () => {
           <MenuItem value="">
             <em>None</em>
           </MenuItem>
-          <MenuItem value={10}>Ten</MenuItem>
+          {optionData?.map((option) => (
+            <MenuItem key={option.Id} value={option.Id}>
+              {option.Name}
+            </MenuItem>
+          ))}
+          {/* <MenuItem value={10}>Ten</MenuItem>
           <MenuItem value={20}>Twenty</MenuItem>
-          <MenuItem value={30}>Thirty</MenuItem>
+          <MenuItem value={30}>Thirty</MenuItem> */}
         </Select>
       </FormControl>
     </div>
   );
-}
+};
 
 export default SelectVariants;

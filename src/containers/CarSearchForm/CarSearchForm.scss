@@ -2,5 +2,13 @@
   &__filterYear{
     display: flex;
     align-items: baseline;
+    margin: 10px 0px 20px 0px;
+  }
+  &__formAction{
+    display: flex;
+    justify-content: center;
+  }
+  &__backdrop{
+    position: absolute;
   }
 }
