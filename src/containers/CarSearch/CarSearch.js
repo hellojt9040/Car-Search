@@ -32,9 +32,7 @@ const CarSearch = () => {
         })),
       };
       setVehicleType(VehicleTypesData);
-      console.log('vehicle type', VehicleTypesData);
     } catch (e) {
-      console.log(e);
       setError(e);
     } finally {
       setIsFetching(false);
@@ -60,9 +58,7 @@ const CarSearch = () => {
         })),
       };
       setVehicleMake(VehicleMakesData);
-      console.log('vehicle make', VehicleMakesData);
     } catch (e) {
-      console.log(e);
       setError(e);
     } finally {
       setIsFetching(false);
@@ -73,7 +69,6 @@ const CarSearch = () => {
   useEffect(() => {
     fetchVehicleType();
   }, [fetchVehicleType, fetchVehicleMake]);
-  console.log('errors...',isError);
   return (
     <>
       {isFetching && <LinearProgress />}

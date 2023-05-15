@@ -5,7 +5,6 @@ import Toolbar from '@mui/material/Toolbar';
 
 const Header = () => {
   return (
-    // <div>
     <AppBar position="static" sx={{ marginBottom: '20px' }}>
       <Toolbar>
         <Typography
@@ -18,7 +17,6 @@ const Header = () => {
         </Typography>
       </Toolbar>
     </AppBar>
-    // </div>
   );
 };
 
