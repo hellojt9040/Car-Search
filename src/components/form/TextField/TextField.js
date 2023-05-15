@@ -1,7 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 
-export default function TextFields({ label, placeholder, type, onChangeHandler }) {
+export default function TextFields({
+  id,
+  label,
+  placeholder,
+  type,
+  validity,
+  isDisabled,
+  triggerValidation,
+  changeHandler,
+}) {
+  const [value, setValue] = useState(new Date().getFullYear());
+  const [touched, setTouched] = React.useState(false);
+
+  const onChangeHandler = (value) => {
+    console.log('text filed change handler...');
+    debugger;
+    const validity = value.toString().length === 4;
+    setTouched(true);
+    changeHandler({
+      payload: {
+        name: id,
+        value,
+        validity: triggerValidation === true ? validity : true,
+      },
+    });
+    setValue(value);
+  };
+
+  const handlerBlur = () => {
+    setTouched(true);
+  };
+
+  useEffect(() => {
+    onChangeHandler(value);
+  }, [triggerValidation]);
+
   return (
     <TextField
       id="standard-basic"
@@ -9,7 +44,11 @@ export default function TextFields({ label, placeholder, type, onChangeHandler }
       variant="standard"
       placeholder={placeholder}
       type={type}
-      onChange={event => onChangeHandler(event.target.value)}
+      error={touched && !validity}
+      value={value}
+      disabled={isDisabled}
+      onChange={(event) => onChangeHandler(event.target.value)}
+      onBlur={handlerBlur}
     />
   );
 }

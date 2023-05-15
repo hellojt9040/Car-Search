@@ -32,40 +32,60 @@ const names = [
   'Kelly Snyder',
 ];
 
-function getStyles(name, personName, theme) {
+function getStyles(name, selectedOptions, theme) {
   return {
     fontWeight:
-      personName.indexOf(name) === -1
+      selectedOptions.indexOf(name) === -1
         ? theme.typography.fontWeightRegular
         : theme.typography.fontWeightMedium,
   };
 }
 
-const MultipleSelectChip = () => {
+const MultipleSelectChip = ({
+  id,
+  label,
+  validity,
+  optionData,
+  changeHandler,
+}) => {
   const theme = useTheme();
-  const [personName, setPersonName] = useState([]);
+  const [selectedOptions, setOptions] = useState([]);
+  const [touched, setTouched] = React.useState(false);
 
   const handleChange = (event) => {
     const {
       target: { value },
     } = event;
-    setPersonName(
+    const validity = !!value?.length;
+    changeHandler({ payload: { name: id, value, validity } });
+    setTouched(true);
+    setOptions(
       // On autofill we get a stringified value.
       typeof value === 'string' ? value.split(',') : value
     );
   };
 
+  const handlerBlur = () => {
+    setTouched(true);
+  };
+
   return (
     <div>
-      <FormControl fullWidth variant="filled" sx={{ m: 1 }}>
-        <InputLabel id="demo-multiple-chip-label">Chip</InputLabel>
+      <FormControl
+        fullWidth
+        variant="filled"
+        sx={{ m: 1 }}
+        error={touched && !validity}
+      >
+        <InputLabel id="demo-multiple-chip-label">{label}</InputLabel>
         <Select
           labelId="demo-multiple-chip-label"
           id="demo-multiple-chip"
           multiple
-          value={personName}
+          value={selectedOptions}
           onChange={handleChange}
-          input={< FilledInput id="select-multiple-chip" label="Chip" />}
+          onClose={handlerBlur}
+          input={<FilledInput id="select-multiple-chip" label="Chip" />}
           renderValue={(selected) => (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {selected.map((value) => (
@@ -75,13 +95,13 @@ const MultipleSelectChip = () => {
           )}
           MenuProps={MenuProps}
         >
-          {names.map((name) => (
+          {optionData?.map((option) => (
             <MenuItem
-              key={name}
-              value={name}
-              style={getStyles(name, personName, theme)}
+              key={option.id}
+              value={option.name}
+              style={getStyles(option.name, selectedOptions, theme)}
             >
-              {name}
+              {option.name}
             </MenuItem>
           ))}
         </Select>

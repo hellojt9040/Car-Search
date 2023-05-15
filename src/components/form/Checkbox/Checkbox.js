@@ -1,11 +1,13 @@
 import * as React from 'react';
 import Checkbox from '@mui/material/Checkbox';
 
-export default function Checkbox() {
-  const [checked, setChecked] = React.useState(true);
+export default function Checkbox({ id, isChecked, changeHandler }) {
+  const [checked, setChecked] = React.useState(isChecked || false);
 
   const handleChange = (event) => {
-    setChecked(event.target.checked);
+    const value = event.target.checked;
+    changeHandler({ payload: { name: id, value } });
+    setChecked(value);
   };
 
   return (
