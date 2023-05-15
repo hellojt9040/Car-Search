@@ -15,8 +15,6 @@ export default function TextFields({
   const [touched, setTouched] = React.useState(false);
 
   const onChangeHandler = (value) => {
-    console.log('text filed change handler...');
-    debugger;
     const validity = value.toString().length === 4;
     setTouched(true);
     changeHandler({

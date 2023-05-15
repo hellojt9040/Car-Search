@@ -2,4 +2,8 @@
   &--disabled {
     position: relative;
   }
+  &__error {
+    color: tomato;
+    margin: 10px 0px;
+  }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import FilledInput from '@mui/material/FilledInput';
@@ -19,19 +19,6 @@ const MenuProps = {
   },
 };
 
-const names = [
-  'Oliver Hansen',
-  'Van Henry',
-  'April Tucker',
-  'Ralph Hubbard',
-  'Omar Alexander',
-  'Carlos Abbott',
-  'Miriam Wagner',
-  'Bradley Wilkerson',
-  'Virginia Andrews',
-  'Kelly Snyder',
-];
-
 function getStyles(name, selectedOptions, theme) {
   return {
     fontWeight:
@@ -45,17 +32,16 @@ const MultipleSelectChip = ({
   id,
   label,
   validity,
+  disabled,
   optionData,
   changeHandler,
+  vehicleType,
 }) => {
   const theme = useTheme();
   const [selectedOptions, setOptions] = useState([]);
   const [touched, setTouched] = React.useState(false);
 
-  const handleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
+  const handleChange = (value) => {
     const validity = !!value?.length;
     changeHandler({ payload: { name: id, value, validity } });
     setTouched(true);
@@ -69,12 +55,20 @@ const MultipleSelectChip = ({
     setTouched(true);
   };
 
+  useEffect(() => {
+    debugger;
+    if (vehicleType && selectedOptions.length) {
+      handleChange([]);
+    }
+  }, [vehicleType]);
+
   return (
     <div>
       <FormControl
         fullWidth
         variant="filled"
         sx={{ m: 1 }}
+        disabled={disabled}
         error={touched && !validity}
       >
         <InputLabel id="demo-multiple-chip-label">{label}</InputLabel>
@@ -83,7 +77,7 @@ const MultipleSelectChip = ({
           id="demo-multiple-chip"
           multiple
           value={selectedOptions}
-          onChange={handleChange}
+          onChange={(e) => handleChange(e.target?.value)}
           onClose={handlerBlur}
           input={<FilledInput id="select-multiple-chip" label="Chip" />}
           renderValue={(selected) => (

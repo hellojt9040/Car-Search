@@ -36,17 +36,11 @@ const SelectVariants = ({ id, label, validity, optionData, changeHandler }) => {
           onChange={handleChange}
           onClose={handlerBlur}
         >
-          {/* <MenuItem value="">
-            <em>None</em>
-          </MenuItem> */}
           {optionData?.map(({ id, name }) => (
             <MenuItem key={id} value={name}>
               {name}
             </MenuItem>
           ))}
-          {/* <MenuItem value={10}>Ten</MenuItem>
-          <MenuItem value={20}>Twenty</MenuItem>
-          <MenuItem value={30}>Thirty</MenuItem> */}
         </Select>
       </FormControl>
     </div>

@@ -27,6 +27,8 @@ const initialState = {
     },
   },
   isFormValid: false,
+  isSubmitted: false,
+  lastSearch: '',
 };
 
 const checkFormValidity = (inputs, name, validity) =>
@@ -67,6 +69,18 @@ const formDataReducer = (state, action = {}) => {
         isFormValid: isFormValid && isValid,
       };
       return updatedValidityState;
+    case 'FORM_SUBMIT':
+      const submittedState = {
+        ...state,
+        isSubmitted: true,
+        lastSearch: JSON.stringify(state.inputs),
+      };
+      return submittedState;
+    case 'RESET_FORM_SUBMIT':
+      return {
+        ...state,
+        isSubmitted: false,
+      };
     default:
       return state;
   }
@@ -75,9 +89,11 @@ const formDataReducer = (state, action = {}) => {
 const CarSearchForm = ({
   vehicleType,
   vehicleMake,
+  fetchVehicleMake,
   isFetching,
   setIsFetching,
-  setVehicleSearchData
+  setVehicleSearchData,
+  setError,
 }) => {
   const [formData, dispatch] = useReducer(formDataReducer, initialState);
   const [triggerYearValidation, setTriggerYearValidation] = useState();
@@ -89,11 +105,31 @@ const CarSearchForm = ({
     [dispatch]
   );
 
-  const makePromises = (data = {}) => {
-    const year = data.withYearFilter ? `/modelyear/${data.year}` : '';
-    const vehicleType = `/vehicleType/${data.vehicleType}`;
+  const vehicleTypeSelected = formData.inputs?.vehicleType?.value?.trim();
+  useEffect(() => {
+    debugger;
+    if (vehicleTypeSelected) {
+      // dispatch({
+      //   type: 'FORM_FIELD_CHANGE',
+      //   payload: { name: 'vehicleMake', value: '', validity: false },
+      // });
+      fetchVehicleMake(vehicleTypeSelected);
+    }
+  }, [vehicleTypeSelected]);
 
-    const promises = data.vehicleMake?.map((make, i) => {
+  const makePromises = (data = {}) => {
+    const {
+      vehicleType: vehicleTypeData,
+      year: yearData,
+      withYearFilter,
+      vehicleMake,
+    } = data;
+    const year = withYearFilter && yearData ? `/modelyear/${yearData}` : '';
+    const vehicleType = vehicleTypeData?.trim()
+      ? `/vehicleType/${vehicleTypeData.trim()}`
+      : '';
+
+    const promises = vehicleMake?.map((make) => {
       return new Promise((resolve, reject) => {
         fetch(
           `https://vpic.nhtsa.dot.gov/api/vehicles/getmodelsformakeyear/make/${make}${year}${vehicleType}?format=json`
@@ -114,6 +150,7 @@ const CarSearchForm = ({
   };
 
   const submitHandler = () => {
+    dispatch({ type: 'FORM_SUBMIT' });
     const { vehicleType, vehicleMake, withYearFilter, year } =
       formData?.inputs || {};
     const apiPromises = makePromises({
@@ -124,17 +161,26 @@ const CarSearchForm = ({
     });
     console.log(apiPromises);
     setIsFetching(true);
-    Promise.allSettled(apiPromises).then((result) => {
-      const vehicleSearchData = result?.flatMap((el) =>
-        el.status === 'fulfilled' && el.value?.Results ? el.value?.Results : []
-      );
-      setIsFetching(false);
-      console.log(vehicleSearchData);
-      setVehicleSearchData(vehicleSearchData);
-    }).catch(e=>{
-      console.log(e);
-      setIsFetching(false);
-    })
+    Promise.allSettled(apiPromises)
+      .then((result) => {
+        debugger;
+        const vehicleSearchData = result
+          ?.flatMap((el) =>
+            el.status === 'fulfilled' && el.value?.Results
+              ? el.value?.Results
+              : []
+          )
+          .map((vehicle) => ({ ...vehicle, id: vehicle.Model_ID }));
+        setIsFetching(false);
+        console.log(vehicleSearchData);
+        setVehicleSearchData(vehicleSearchData);
+      })
+      .catch((e) => {
+        debugger;
+        console.log(e);
+        setIsFetching(false);
+        setError(e);
+      });
   };
 
   const isWithYearFilterChecked = formData.inputs?.withYearFilter?.value;
@@ -142,6 +188,14 @@ const CarSearchForm = ({
     setTriggerYearValidation(isWithYearFilterChecked);
   }, [isWithYearFilterChecked]);
 
+  const anyFormFieldChanged =
+    formData.lastSearch !== JSON.stringify(formData.inputs);
+
+  debugger;
+  console.log('changed...', anyFormFieldChanged);
+
+  // console.table(formData.inputs);
+  console.table(formData);
   return (
     <div className="CarSearchForm">
       {/* {JSON.stringify(formData)} */}
@@ -157,6 +211,8 @@ const CarSearchForm = ({
           id="vehicleMake"
           label="Vehicle Make"
           validity={formData.inputs?.vehicleMake?.validity}
+          disabled={!vehicleTypeSelected}
+          vehicleType={vehicleTypeSelected}
           optionData={vehicleMake?.Results}
           changeHandler={onChangeHandler}
         />
@@ -182,7 +238,9 @@ const CarSearchForm = ({
           <Button
             variant="contained"
             fullWidth
-            disabled={!formData.isFormValid || isFetching}
+            disabled={
+              !formData.isFormValid || isFetching || !anyFormFieldChanged
+            }
             onClick={submitHandler}
           >
             Search
